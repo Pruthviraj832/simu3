@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Labs - Jacobian - LAUC (Step-by-Step Sim)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+body{background:#f8f9fa;color:#333;line-height:1.6;}
+.container{max-width:1200px;margin:0 auto;padding:0 20px;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#2c3e50,#1a2530);color:white;padding:15px 0;box-shadow:0 4px 12px rgba(0,0,0,0.1);position:sticky;top:0;z-index:200;}
+.header-container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.logo-section{display:flex;align-items:center;gap:25px;flex-wrap:wrap;}
+.pcce-logo-container{display:flex;align-items:center;gap:15px;padding-right:25px;border-right:2px solid rgba(255,255,255,0.2);}
+.pcce-logo-img{width:60px;height:60px;object-fit:contain;border-radius:8px;background:white;padding:5px;}
+.pcce-logo-text .main{font-size:18px;font-weight:700;}
+.pcce-logo-text .sub{font-size:11px;}
+.virtual-labs-logo h1{font-size:22px;}
+.virtual-labs-logo span{color:#3498db;}
+.header-right{display:flex;align-items:center;gap:10px;position:relative;}
+.auth-btn{padding:7px 16px;border-radius:6px;font-weight:600;cursor:pointer;border:none;}
+.btn-login{background:transparent;border:1.5px solid rgba(255,255,255,0.5);color:white;}
+.btn-signup{background:#3498db;color:white;}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:24px;cursor:pointer;}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:#3498db;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:white;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.15);padding:8px 0;min-width:190px;display:none;z-index:300;}
+.user-dropdown.open{display:block;}
+.user-dropdown a{display:flex;align-items:center;gap:10px;padding:10px 18px;color:#333;text-decoration:none;font-size:14px;cursor:pointer;}
+.user-dropdown a:hover{background:#f0f7ff;}
+.user-dropdown .logout{color:#e74c3c;}
+
+/* HOME */
+.home-page{padding:36px 0 60px;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;}
+.home-card{background:white;border-radius:12px;padding:26px 18px;text-align:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:2px solid transparent;transition:all 0.25s;}
+.home-card:hover{transform:translateY(-5px);border-color:#3498db;}
+.card-icon{width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#3498db,#2c80b9);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;}
+.card-status{padding:3px 10px;border-radius:20px;display:inline-block;font-size:11px;font-weight:600;}
+.status-done{background:#d4edda;color:#155724;}
+.status-visited{background:#fff3cd;color:#856404;}
+.status-not{background:#f0f4f8;color:#7f8c8d;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(13,27,42,0.72);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:white;border-radius:14px;width:100%;max-width:1000px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #eee;flex-shrink:0;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.back-home-btn{background:#f0f4f8;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;}
+
+/* STEP SIMULATION */
+.step-sim-container{margin-top:12px;}
+.step-card{background:#fff;border:2px solid #e9ecef;border-radius:16px;padding:22px;margin-bottom:28px;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+.step-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #f0f4fa;padding-bottom:10px;}
+.step-title{font-size:20px;font-weight:700;color:#2c3e50;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.step-points{background:#f8f9fa;padding:6px 14px;border-radius:40px;font-weight:700;color:#27ae60;font-size:14px;border:1px solid #d5f5e3;}
+.step-desc{font-size:15px;color:#4a5c6c;margin-bottom:18px;background:#f8fafc;padding:12px 16px;border-radius:12px;}
+.step-formula{background:#1e2a36;color:#c9ffdb;font-family:'Courier New',monospace;padding:12px 18px;border-radius:10px;margin-bottom:18px;font-size:14px;}
+.input-group{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:20px;}
+.input-field{flex:2;min-width:180px;}
+.input-field label{font-size:12px;font-weight:600;color:#5f7f9e;display:block;margin-bottom:5px;}
+.input-field input{width:100%;padding:10px 14px;border:1.5px solid #dde3ea;border-radius:10px;font-size:14px;}
+.check-btn{background:#3498db;color:white;border:none;padding:10px 26px;border-radius:40px;font-weight:600;cursor:pointer;transition:0.2s;}
+.check-btn:hover{background:#2c80b9;transform:scale(0.97);}
+.feedback-msg{margin-top:12px;padding:10px 16px;border-radius:12px;font-size:13px;display:none;}
+.feedback-correct{background:#e1f7ea;color:#0d6832;border-left:5px solid #27ae60;display:block;}
+.feedback-wrong{background:#fee2e2;color:#a1220a;border-left:5px solid #e74c3c;display:block;}
+.feedback-neutral{background:#fff3cd;color:#856404;border-left:5px solid #f39c12;display:block;}
+.locked-next{background:#d1d9e6;color:#5c6f87;cursor:not-allowed;opacity:0.6;}
+.step-locked-marker{font-size:12px;color:#e67e22;margin-left:10px;font-weight:normal;}
+.completion-badge{display:inline-block;background:#27ae60;color:white;border-radius:30px;padding:4px 14px;font-size:12px;font-weight:700;margin-left:12px;}
+.sim-footer{background:#ecf5fb;border-radius:14px;padding:18px;margin-top:20px;}
+.final-message{background:#d4edda;padding:16px;border-radius:14px;text-align:center;font-weight:700;color:#155724;margin-top:20px;}
+.points-summary{font-size:15px;font-weight:700;color:#2c3e50;}
+.example-box{background:#eef2fa;border-radius:12px;padding:15px;margin-bottom:20px;border-left:5px solid #3498db;}
+.example-box h4{margin-bottom:8px;color:#2c3e50;}
+.show-solution-btn{background:#27ae60;color:white;border:none;padding:10px 20px;border-radius:40px;font-weight:600;cursor:pointer;margin-top:12px;}
+.detailed-solution{background:#f9fbe7;padding:18px;border-radius:14px;margin-top:18px;display:none;border:1px solid #d4e0d4;}
+hr{margin:14px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-container">
+    <div class="logo-section">
+      <div class="pcce-logo-container">
+        <img src="https://raw.githubusercontent.com/dineshkute90/virtual_lab_LAUC/main/pccoe.png" alt="PCOE Logo" class="pcce-logo-img" onerror="this.src='https://via.placeholder.com/60x60/2c3e50/ffffff?text=PCOE';">
+        <div class="pcce-logo-text"><div class="main">APPLIED SCIENCES &amp; HUMANITIES</div><div class="sub">Pimpri Chinchwad College of Engineering</div></div>
+      </div>
+      <div class="virtual-labs-logo"><h1>Virtual <span>Labs</span></h1></div>
+    </div>
+    <div class="header-right" id="headerRight"></div>
+  </div>
+</header>
+
+<div class="container home-page" id="homePage">
+  <div class="home-title"><h2>Jacobian — Virtual Lab</h2><p>Engineering Mathematics · Homogeneous Functions · Step-by-step simulation</p></div>
+  <div class="cards-grid">
+    <div class="home-card" onclick="openSection('aim')"><div class="card-icon">🎯</div><h3>Aim</h3><span class="card-status status-not" id="st-aim">Not Started</span></div>
+    <div class="home-card" onclick="openSection('theory')"><div class="card-icon">📘</div><h3>Theory</h3><span class="card-status status-not" id="st-theory">Not Started</span></div>
+    <div class="home-card" onclick="openSection('pretest')"><div class="card-icon">📝</div><h3>Pretest</h3><span class="card-status status-not" id="st-pretest">Not Started</span></div>
+    <div class="home-card" onclick="openSection('simulation')"><div class="card-icon">⚙️</div><h3>Simulation</h3><span class="card-status status-not" id="st-simulation">Not Started</span></div>
+    <div class="home-card" onclick="openSection('posttest')"><div class="card-icon">📋</div><h3>Posttest</h3><span class="card-status status-not" id="st-posttest">Not Started</span></div>
+    <div class="home-card" onclick="openSection('references')"><div class="card-icon">📚</div><h3>References</h3><span class="card-status status-not" id="st-references">Not Started</span></div>
+    <div class="home-card" onclick="openSection('contributors')"><div class="card-icon">👥</div><h3>Contributors</h3><span class="card-status status-not" id="st-contributors">Not Started</span></div>
+    <div class="home-card" onclick="openSection('feedback')"><div class="card-icon">💬</div><h3>Feedback</h3><span class="card-status status-not" id="st-feedback">Not Started</span></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sectionModal"><div class="modal-box"><div class="modal-header"><h2 id="modalTitle">Section</h2><button class="back-home-btn" onclick="closeSection()">← Back to Home</button></div><div class="modal-body" id="modalBody"></div></div></div>
+<div class="modal-overlay" id="authModal"><div class="auth-modal-box" style="background:white;border-radius:14px;max-width:420px;width:100%;"><div class="modal-header"><h2>Student Account</h2><button class="back-home-btn" onclick="closeAuth()">✕</button></div><div style="padding:22px;"><div class="auth-tabs" style="display:flex;gap:6px;"><div class="auth-tab active" onclick="switchTab('login')">Sign In</div><div class="auth-tab" onclick="switchTab('signup')">Sign Up</div></div><div id="form-login"><input type="text" id="login-id" placeholder="Roll Number"><input type="password" id="login-pass" placeholder="Password" style="margin-top:12px;"><div class="form-error" id="login-err"></div><button class="auth-submit" onclick="doLogin()" style="margin-top:16px;">Sign In</button></div><div id="form-signup" style="display:none;"><input type="text" id="su-name" placeholder="Full Name"><input type="text" id="su-roll" placeholder="Roll Number" style="margin-top:12px;"><input type="password" id="su-pass" placeholder="Password" style="margin-top:12px;"><input type="password" id="su-pass2" placeholder="Confirm" style="margin-top:12px;"><button class="auth-submit" onclick="doSignup()" style="margin-top:16px;">Create Account</button></div></div></div></div>
+<div class="modal-overlay" id="dashModal"><div class="modal-box"><div class="modal-header"><h2>My Dashboard</h2><button class="back-home-btn" onclick="document.getElementById('dashModal').classList.remove('open')">Close</button></div><div class="modal-body" id="dashBody"></div></div></div>
+<footer class="container"><p>Virtual Labs © 2025 | Applied Sciences &amp; Humanities | Pimpri Chinchwad College of Engineering</p></footer>
+
+<script>
+// ---------- AUTH & PROGRESS ----------
+let currentUser = null;
+function getUsers(){try{return JSON.parse(localStorage.getItem('vlab_users')||'{}');}catch(e){return {};}}
+function saveUsers(u){localStorage.setItem('vlab_users',JSON.stringify(u));}
+function getCurrentUser(){try{return JSON.parse(localStorage.getItem('vlab_current')||'null');}catch(e){return null;}}
+function setCurrentUser(u){if(u)localStorage.setItem('vlab_current',JSON.stringify(u));else localStorage.removeItem('vlab_current');}
+function getUserProgress(roll){try{return JSON.parse(localStorage.getItem('vlab_prog_'+roll)||'{}');}catch(e){return {};}}
+function saveUserProgress(roll,d){localStorage.setItem('vlab_prog_'+roll,JSON.stringify(d));}
+function renderHeader(){
+  const hr=document.getElementById('headerRight');
+  if(currentUser){
+    const ini=currentUser.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    hr.innerHTML=`<div class="user-chip" onclick="toggleDD()"><div class="user-avatar">${ini}</div><span class="uname">${currentUser.name.split(' ')[0]}</span>▼</div><div class="user-dropdown" id="userDD"><a onclick="openDashboard()">📊 Dashboard</a><hr><a onclick="doLogout()" class="logout">🚪 Sign Out</a></div>`;
+  }else{
+    hr.innerHTML=`<button class="auth-btn btn-login" onclick="openAuth('login')">Sign In</button><button class="auth-btn btn-signup" onclick="openAuth('signup')">Sign Up</button>`;
+  }
+  updateAllStatuses();
+}
+function toggleDD(){const d=document.getElementById('userDD');if(d)d.classList.toggle('open');}
+document.addEventListener('click',e=>{const dd=document.getElementById('userDD');if(dd&&!e.target.closest('.user-chip')&&!e.target.closest('.user-dropdown'))dd.classList.remove('open');});
+function openAuth(){document.getElementById('authModal').classList.add('open');}
+function closeAuth(){document.getElementById('authModal').classList.remove('open');}
+function switchTab(t){document.getElementById('form-login').style.display=t==='login'?'block':'none';document.getElementById('form-signup').style.display=t==='signup'?'block':'none';}
+function doLogin(){
+  const id=document.getElementById('login-id').value.trim().toLowerCase();
+  const pw=document.getElementById('login-pass').value;
+  const u=getUsers()[id];
+  if(!u||u.password!==pw){document.getElementById('login-err').innerText='Invalid credentials';return;}
+  currentUser={name:u.name,roll:u.roll};setCurrentUser(currentUser);closeAuth();renderHeader();
+}
+function doSignup(){
+  const name=document.getElementById('su-name').value.trim();
+  const roll=document.getElementById('su-roll').value.trim();
+  const pw=document.getElementById('su-pass').value;
+  const pw2=document.getElementById('su-pass2').value;
+  if(!name||!roll||pw.length<6||pw!==pw2){alert('Check fields');return;}
+  const users=getUsers();users[roll.toLowerCase()]={name,roll,password:pw};saveUsers(users);
+  currentUser={name,roll};setCurrentUser(currentUser);closeAuth();renderHeader();
+}
+function doLogout(){currentUser=null;setCurrentUser(null);renderHeader();}
+function markVisited(s){if(!currentUser)return;const p=getUserProgress(currentUser.roll);if(!p.visited)p.visited={};p.visited[s]=true;saveUserProgress(currentUser.roll,p);updateAllStatuses();}
+function saveSimPoints(points){if(!currentUser)return;const p=getUserProgress(currentUser.roll);p.simPoints=points;saveUserProgress(currentUser.roll,p);updateAllStatuses();}
+function updateAllStatuses(){
+  const p=currentUser?getUserProgress(currentUser.roll):{};
+  ['aim','theory','pretest','simulation','posttest','references','contributors','feedback'].forEach(s=>{
+    const el=document.getElementById('st-'+s);if(!el)return;
+    if(p.simPoints!==undefined && s==='simulation')el.textContent=`⭐ ${p.simPoints} pts`;else if(p.visited&&p.visited[s])el.textContent='Visited';else el.textContent='Not Started';
+  });
+}
+function openSection(name){
+  markVisited(name);
+  document.getElementById('modalTitle').innerHTML=name.charAt(0).toUpperCase()+name.slice(1);
+  const modal=document.getElementById('sectionModal');
+  const body=document.getElementById('modalBody');
+  if(name==='simulation'){
+    body.innerHTML=`<div class="step-sim-container" id="stepSimContainer"></div>`;
+    modal.classList.add('open');
+    buildStepSimulation();
+  }else{
+    let simpleContent=`<div style="padding:10px;"><h3>${name} content</h3><p>Interactive content loaded for ${name}.</p></div>`;
+    if(name==='aim')simpleContent=`<div class="aim-box"><h3>Aim</h3><p>To understand Jacobian determinant through guided step-by-step simulation with instant feedback and point scoring.</p></div>`;
+    if(name==='theory')simpleContent=`<div><h3>Jacobian Theory</h3><p>Jacobian = determinant of partial derivatives. For u(x,y), v(x,y): J = ∂(u,v)/∂(x,y) = (∂u/∂x)(∂v/∂y)-(∂u/∂y)(∂v/∂x).</p><p>For polar: x=r cosθ, y=r sinθ ⇒ J = r</p></div>`;
+    if(name==='pretest')simpleContent=`<div><h3>Pretest: Jacobian Fundamentals</h3><ol><li>What does Jacobian represent? (a) Rate of change (b) Scaling factor for transformation (c) Derivative of single variable</li><li>For u=2x+3y, v=4x+5y, J = ? (a) -2 (b) 2 (c) 22</li><li>Polar Jacobian J = ? (a) r (b) r² (c) 1</li><li>If J=0, transformation is? (a) Invertible (b) Singular (c) Linear</li><li>Jacobian is a: (a) Scalar (b) Vector (c) Matrix determinant</li></ol><p><strong>Answers:</strong> 1-b, 2-a (det[[2,3],[4,5]] = 10-12=-2), 3-a, 4-b, 5-c</p></div>`;
+    if(name==='posttest')simpleContent=`<div><h3>Posttest Assessment</h3><p>1. Compute J for u=x³y², v=x²y³ at (1,1). (Answer: -1)<br>2. For x=r cosθ, y=r sinθ, prove J=r.<br>3. If u=x+y, v=x-y, find J. (Answer: -2)<br>4. Explain geometric significance of Jacobian.</p></div>`;
+    if(name==='references')simpleContent=`<ul><li>Advanced Engineering Mathematics - Erwin Kreyszig (10th Edition)</li><li>Engineering Mathematics - B.S. Grewal (42nd Edition)</li><li>Higher Engineering Mathematics - B.V. Ramana</li></ul>`;
+    if(name==='contributors')simpleContent=`<div><h3>Development Team</h3><p><strong>Faculty Mentor:</strong> Prof. Ganesh Tarte</p><p><strong>Student Developers:</strong></p><ul><li>Pruthviraj Bankar</li><li>Anirudh Nair</li><li>Siddharth Shelke</li></ul><p>Guided by Department of Applied Sciences & Humanities, Pimpri Chinchwad College of Engineering.</p></div>`;
+    if(name==='feedback')simpleContent=`<div><h3>Feedback Form</h3><p>We value your input! Please send your suggestions, bug reports, or appreciation to:</p><p>📧 Email: virtual.labs@pcce.ac.in</p><p>📝 Alternatively, use the feedback section in your dashboard after completing the simulation.</p><p>Your feedback helps us improve the virtual lab experience.</p></div>`;
+    body.innerHTML=simpleContent;
+    modal.classList.add('open');
+  }
+}
+function closeSection(){document.getElementById('sectionModal').classList.remove('open');}
+function openDashboard(){
+  if(!currentUser)return;
+  const p=getUserProgress(currentUser.roll);
+  const simPoints=p.simPoints||0;
+  document.getElementById('dashBody').innerHTML=`<div style="padding:8px;"><h3>${currentUser.name}</h3><p>Roll: ${currentUser.roll}</p><div class="points-summary">🏆 Simulation Points: ${simPoints}</div><hr><p>Keep practicing step-by-step!</p><p>✅ Completed steps: ${p.stepPoints ? p.stepPoints.filter(v=>v===true).length : 0}/5</p></div>`;
+  document.getElementById('dashModal').classList.add('open');
+}
+
+// ---------- STEP SIMULATION: Enhanced with 6 steps (includes full Jacobian solving steps, examples, detailed solution) ----------
+let stepState = {
+  unlocked: [true, false, false, false, false, false],
+  completed: [false, false, false, false, false, false],
+  pointsEarned: [false, false, false, false, false, false],
+  totalPoints: 0
+};
+
+// Questions build on each other: solving Jacobian for u = x^2 y, v = x y^2 at point (2,3)
+const stepsData = [
+  { id:0, title:"Step 1: ∂u/∂x (Partial derivative of u w.r.t x)", description:"Given: u(x,y) = x²y , v(x,y) = xy². Compute ∂u/∂x at point (x=2, y=3).", hint:"∂/∂x (x²y) = 2xy. Then substitute x=2, y=3.", answer:12, points:2, example:"Example: For u = x²y, ∂u/∂x = 2xy. At (2,3) = 2*2*3 = 12." },
+  { id:1, title:"Step 2: ∂v/∂y (Partial derivative of v w.r.t y)", description:"Now compute ∂v/∂y for v = xy² at (x=2, y=3).", hint:"∂/∂y (x*y²) = 2xy. At (2,3)=12.", answer:12, points:2, example:"∂v/∂y = 2xy => at (2,3)=12." },
+  { id:2, title:"Step 3: ∂u/∂y (Partial derivative of u w.r.t y)", description:"Find ∂u/∂y for u = x²y at (2,3).", hint:"∂/∂y (x²y) = x². So at x=2 → 4.", answer:4, points:2, example:"∂u/∂y = x² = 2² = 4." },
+  { id:3, title:"Step 4: ∂v/∂x (Partial derivative of v w.r.t x)", description:"Find ∂v/∂x for v = xy² at (2,3).", hint:"∂/∂x (x*y²) = y² → 3² = 9.", answer:9, points:2, example:"∂v/∂x = y² = 9." },
+  { id:4, title:"Step 5: Jacobian Determinant J = ∂(u,v)/∂(x,y)", description:"Using formula J = (∂u/∂x)(∂v/∂y) - (∂u/∂y)(∂v/∂x). Plug values from previous steps at (2,3).", hint:"∂u/∂x=12, ∂v/∂y=12, ∂u/∂y=4, ∂v/∂x=9 → J = (12*12) - (4*9) = 144 - 36 = 108.", answer:108, points:2, example:"J = 12·12 - 4·9 = 108" },
+  { id:5, title:"Step 6: Polar Coordinates Jacobian Check", description:"For polar coordinates: x = r cosθ, y = r sinθ. The Jacobian J = ∂(x,y)/∂(r,θ) = r. Compute J at r=3, θ=π/4.", hint:"J = r = 3, independent of θ.", answer:3, points:2, example:"r = 3 ⇒ J = 3" }
+];
+
+function buildStepSimulation(){
+  const container = document.getElementById('stepSimContainer');
+  if(!container) return;
+  const saved = localStorage.getItem('simStepState');
+  if(saved && currentUser){
+    try{
+      let st = JSON.parse(saved);
+      if(st.roll === currentUser.roll) stepState = st.state;
+      else resetStepState();
+    }catch(e){resetStepState();}
+  }else resetStepState();
+  renderStepsUI(container);
+}
+
+function resetStepState(){
+  stepState = { unlocked:[true,false,false,false,false,false], completed:[false,false,false,false,false,false], pointsEarned:[false,false,false,false,false,false], totalPoints:0 };
+  if(currentUser){
+    const prog = getUserProgress(currentUser.roll);
+    if(prog.simPoints) stepState.totalPoints = prog.simPoints;
+    else stepState.totalPoints = 0;
+    if(prog.stepPoints){
+      for(let i=0;i<6;i++){
+        if(prog.stepPoints[i]){
+          stepState.completed[i]=true;
+          stepState.pointsEarned[i]=true;
+          if(i+1<6) stepState.unlocked[i+1]=true;
+        }
+      }
+    }
+  }
+  saveStepStateToLocal();
+}
+
+function saveStepStateToLocal(){
+  if(currentUser){
+    const prog = getUserProgress(currentUser.roll);
+    if(!prog.stepPoints) prog.stepPoints = [];
+    for(let i=0;i<6;i++) prog.stepPoints[i]=stepState.pointsEarned[i];
+    prog.simPoints = stepState.totalPoints;
+    saveUserProgress(currentUser.roll, prog);
+    localStorage.setItem('simStepState', JSON.stringify({roll:currentUser.roll, state:stepState}));
+  }
+}
+
+function updateTotalPointsDisplay(){
+  let total = stepState.pointsEarned.reduce((acc,val,i)=>acc+(val?stepsData[i].points:0),0);
+  stepState.totalPoints = total;
+  if(currentUser) saveSimPoints(total);
+  const summaryDiv = document.getElementById('simPointsDisplay');
+  if(summaryDiv) summaryDiv.innerText = `🏆 Total Points: ${total} / ${stepsData.reduce((s,st)=>s+st.points,0)}`;
+  const footerDiv = document.getElementById('simFooterMsg');
+  if(total === stepsData.reduce((s,st)=>s+st.points,0)) footerDiv.innerHTML = '<div class="final-message">🎉✨ Exceptional! You mastered all Jacobian steps! ✨🎉</div>';
+  else footerDiv.innerHTML = '<div class="points-summary">📌 Complete each step correctly to earn points and unlock the next step. 📌</div>';
+  saveStepStateToLocal();
+  updateAllStatuses();
+}
+
+function renderStepsUI(container){
+  container.innerHTML = '';
+  let totalPossible = stepsData.reduce((a,b)=>a+b.points,0);
+  let earned = stepState.pointsEarned.reduce((a,b,i)=>a+(b?stepsData[i].points:0),0);
+  
+  // Example Panel with detailed solution
+  const examplePanel = document.createElement('div');
+  examplePanel.className = 'example-box';
+  examplePanel.innerHTML = `<h4>📖 Worked Example: Jacobian of u = x²y , v = xy²</h4>
+  <p><strong>Problem:</strong> Find Jacobian determinant J = ∂(u,v)/∂(x,y) at point (2,3).</p>
+  <p><strong>Solution approach:</strong> Compute all four partial derivatives first, then apply determinant formula.</p>
+  <button id="showSolutionBtn" class="show-solution-btn">📘 View Complete Step-by-Step Solution</button>
+  <div id="detailedSolutionDiv" class="detailed-solution"></div>`;
+  container.appendChild(examplePanel);
+  
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'step-sim-header';
+  headerDiv.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap;"><h3 style="color:#2c3e50;">⚡ Interactive Jacobian Lab - Solve Each Step & Earn Points</h3><div id="simPointsDisplay" style="background:#eef2f7; padding:8px 18px; border-radius:40px; font-weight:700;">🏆 Points: ${earned}/${totalPossible}</div></div>`;
+  container.appendChild(headerDiv);
+  
+  for(let i=0;i<stepsData.length;i++){
+    const step = stepsData[i];
+    const unlocked = stepState.unlocked[i];
+    const completed = stepState.completed[i];
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    if(!unlocked && !completed) card.style.opacity = '0.7';
+    card.innerHTML = `
+      <div class="step-header">
+        <div class="step-title"><span>📌 ${step.title}</span> ${completed ? '<span class="completion-badge">✔️ Completed</span>' : (unlocked? '<span class="step-locked-marker">🔓 Ready</span>' : '<span class="step-locked-marker">🔒 Locked (complete previous)</span>')}</div>
+        <div class="step-points">⭐ ${step.points} pts</div>
+      </div>
+      <div class="step-desc">${step.description}</div>
+      <div class="step-formula">💡 Hint: ${step.hint}</div>
+      <div class="input-group">
+        <div class="input-field"><label>✍️ Your answer:</label><input type="number" id="step-input-${i}" placeholder="Enter numeric value" ${!unlocked || completed ? 'disabled' : ''}></div>
+        <button class="check-btn" id="step-btn-${i}" ${!unlocked || completed ? 'disabled' : ''}>✓ Check & Earn Points</button>
+      </div>
+      <div class="feedback-msg" id="step-fb-${i}"></div>
+    `;
+    container.appendChild(card);
+    if(unlocked && !completed){
+      const btn = document.getElementById(`step-btn-${i}`);
+      if(btn){
+        btn.onclick = () => verifyStep(i);
+      }
+    }
+  }
+  const footer = document.createElement('div');
+  footer.id = 'simFooterMsg';
+  footer.className = 'sim-footer';
+  footer.innerHTML = '<div class="points-summary">📌 Complete each step correctly to earn points → unlock next step. 📌</div>';
+  container.appendChild(footer);
+  updateTotalPointsDisplay();
+  
+  // Detailed solution logic
+  const solBtn = document.getElementById('showSolutionBtn');
+  if(solBtn){
+    solBtn.onclick = () => {
+      const solDiv = document.getElementById('detailedSolutionDiv');
+      if(solDiv){
+        solDiv.style.display = solDiv.style.display === 'none' || !solDiv.style.display ? 'block' : 'none';
+        if(solDiv.innerHTML === ''){
+          solDiv.innerHTML = `<h4>📝 Full Derivation (Jacobian Calculation)</h4>
+          <p><strong>Given transformation:</strong> u = x²y , v = xy² at point (2,3).</p>
+          <p><strong>Step 1:</strong> ∂u/∂x = 2xy → at (2,3) = 2·2·3 = <strong>12</strong></p>
+          <p><strong>Step 2:</strong> ∂v/∂y = 2xy → at (2,3) = 2·2·3 = <strong>12</strong></p>
+          <p><strong>Step 3:</strong> ∂u/∂y = x² → at (2,3) = 2² = <strong>4</strong></p>
+          <p><strong>Step 4:</strong> ∂v/∂x = y² → at (2,3) = 3² = <strong>9</strong></p>
+          <p><strong>Step 5:</strong> Jacobian J = (∂u/∂x)(∂v/∂y) - (∂u/∂y)(∂v/∂x) = (12)(12) - (4)(9) = 144 - 36 = <strong>108</strong></p>
+          <p><strong>Step 6 (Extension):</strong> For polar coordinates, J = r. At r=3, J = 3.</p>
+          <p><strong>Geometric meaning:</strong> Jacobian gives scaling factor for area/volume under transformation. Here J=108 means area scales by factor 108 near (2,3).</p>
+          <hr><p><em>Great job! Follow the interactive steps above to earn points.</em></p>`;
+        }
+      }
+    };
+  }
+}
+
+function verifyStep(stepIdx){
+  const step = stepsData[stepIdx];
+  const inp = document.getElementById(`step-input-${stepIdx}`);
+  if(!inp) return;
+  let userVal = parseFloat(inp.value);
+  if(isNaN(userVal)){ showFeedback(stepIdx, '⚠️ Please enter a numeric answer', 'neutral'); return; }
+  let isCorrect = (Math.abs(userVal - step.answer) < 1e-5);
+  
+  if(isCorrect && !stepState.completed[stepIdx]){
+    stepState.completed[stepIdx] = true;
+    if(!stepState.pointsEarned[stepIdx]){
+      stepState.pointsEarned[stepIdx] = true;
+      showFeedback(stepIdx, `✅ Correct! You earned ${step.points} points! 🎉`, 'correct');
+      if(stepIdx+1 < stepsData.length && !stepState.unlocked[stepIdx+1]){
+        stepState.unlocked[stepIdx+1] = true;
+      }
+      saveStepStateToLocal();
+      renderStepsUI(document.getElementById('stepSimContainer'));
+      updateTotalPointsDisplay();
+    } else {
+      showFeedback(stepIdx, `Already completed! Points already awarded.`, 'neutral');
+    }
+  } else if(isCorrect && stepState.completed[stepIdx]){
+    showFeedback(stepIdx, `Step already completed ✓`, 'neutral');
+  } else {
+    showFeedback(stepIdx, `❌ Incorrect. Expected answer: ${step.answer}. Hint: ${step.hint}`, 'wrong');
+    inp.value = '';
+  }
+}
+
+function showFeedback(idx, msg, type){
+  const fbDiv = document.getElementById(`step-fb-${idx}`);
+  if(!fbDiv) return;
+  fbDiv.innerHTML = msg;
+  fbDiv.className = `feedback-msg feedback-${type}`;
+  fbDiv.style.display = 'block';
+  setTimeout(()=>{ if(fbDiv) fbDiv.style.display = 'none'; }, 4000);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  currentUser = getCurrentUser();
+  renderHeader();
+  document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+    overlay.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+  });
+});
+</script>
+</body>
+</html>
